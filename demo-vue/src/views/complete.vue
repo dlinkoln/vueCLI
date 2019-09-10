@@ -113,70 +113,59 @@
   <main class="wrapper">
     <div class="signUp">
       <h3 class="signUp__title signUp__title_complete">Complete your account</h3>
-      <form @submit.prevent="completeHandler">
+      <input
+        type="password"
+        v-model="$v.pass.$model"
+        id="createPass"
+        placeholder="Create a password"
+      />
+      <div :class="visible === false ? 'hide' : '' " class="pass__progress">
+        <div :class="colored"></div>
+        <div :class="colored"></div>
+        <div :class="colored"></div>
+      </div>
+      <input
+        type="password"
+        id="confirmPass"
+        placeholder="Confirm password"
+        v-model="$v.confirmPass.$model"
+      />
+      <small v-if="!passwordMatch">Password is not match</small>
+      <div class="complete__checkbox">
+        <input type="checkbox" id="complete__inputTerm" @change="$v.terms.$touch()" v-model="terms" />
+        <label for="complete__inputTerm" class="inputTerm">
+          I agree to the myFixer.com
+          <a href>Terms of Service</a>
+        </label>
         <input
-          type="password"
-          v-model="$v.pass.$model"
-          id="createPass"
-          placeholder="Create a password"
+          type="checkbox"
+          id="complete__inputPrivacy"
+          @change="$v.privacy.$touch()"
+          v-model="privacy"
         />
-        <div :class="visible === false ? 'hide' : '' " class="pass__progress">
-          <div :class="colored"></div>
-          <div :class="colored"></div>
-          <div :class="colored"></div>
-        </div>
-        <input
-          type="password"
-          id="confirmPass"
-          placeholder="Confirm password"
-          v-model="$v.confirmPass.$model"
-        />
-        <small v-if="!passwordMatch">Password is not match</small>
-        <div class="complete__checkbox">
-          <input
-            type="checkbox"
-            id="complete__inputTerm"
-            @change="$v.terms.$touch()"
-            v-model="terms"
-          />
-          <label for="complete__inputTerm" class="inputTerm">
-            I agree to the myFixer.com
-            <a href>Terms of Service</a>
-          </label>
-          <input
-            type="checkbox"
-            id="complete__inputPrivacy"
-            @change="$v.privacy.$touch()"
-            v-model="privacy"
-          />
-          <label for="complete__inputPrivacy" class="inputPrivacy">
-            I agree to the myFixer.com
-            <a href>Privacy Policy</a>
-          </label>
-        </div>
-        <small v-if="$v.terms.$invalid">Terms must be accepted</small>
-        <small v-if="$v.privacy.$invalid">Privacy must be accepted</small>
-        <svg
-          width="210"
-          height="61"
-          viewBox="0 0 210 61"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlns:xlink="http://www.w3.org/1999/xlink"
-        />
-        <button
-          type="submit"
-          @click=" completeSubmit"
-          class="sbm__btn sbm__btn_in"
-          id="started"
-        >Done!</button>
-      </form>
+        <label for="complete__inputPrivacy" class="inputPrivacy">
+          I agree to the myFixer.com
+          <a href>Privacy Policy</a>
+        </label>
+      </div>
+      <small v-if="$v.terms.$invalid">Terms must be accepted</small>
+      <small v-if="$v.privacy.$invalid">Privacy must be accepted</small>
+      <svg
+        width="210"
+        height="61"
+        viewBox="0 0 210 61"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+      />
+      <button type="submit" @click="completeSubmit" class="sbm__btn sbm__btn_in" id="started">Done!</button>
     </div>
   </main>
 </body>
 </template>
 <script>
 import { sameAs, required, minLength } from "vuelidate/lib/validators";
+import axios from "axios";
 export default {
   name: "complete",
   data() {
@@ -186,6 +175,9 @@ export default {
       terms: false,
       privacy: false
     };
+  },
+  props: {
+    complete: Function
   },
   validations: {
     pass: {
@@ -211,7 +203,22 @@ export default {
     },
     completeSubmit() {
       if (!this.$v.$invalid) {
-        this.$router.push("/chat");
+        let user = this.$route.params.user;
+        user.password = this.pass;
+        console.log(user);
+        axios
+          .post("http://localhost:3000/accounts/sign-up", user)
+          .then(function(response) {
+            // handle success
+            console.log(response);
+          })
+          .catch(function(error) {
+            // handle error
+            console.log(error);
+          });
+        //TODO: axios
+        //this.complete(this.pass);
+        //this.$router.push("/chat");
       }
     }
   },

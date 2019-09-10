@@ -116,17 +116,19 @@
       <form @submit.prevent="signInHandler">
         <input
           type="text"
-          v-model.trim="email"
+          v-model.trim="user.email"
           @keyup="signInHandler"
           id="emailIn"
           placeholder="Email"
         />
-        <small v-if="($v.email.$dirty && !$v.email.required)">Field email is empty</small>
-        <small v-else-if="($v.email.$dirty && !$v.email.email)">Add corect Email</small>
-        <input type="password" v-model="password" id="passwordIn" placeholder="Password" />
-        <small v-if="($v.password.$dirty && !$v.password.required)">Password field is empty</small>
+        <small v-if="($v.user.email.$dirty && !$v.user.email.required)">Field email is empty</small>
+        <small v-else-if="($v.user.email.$dirty && !$v.user.email.email)">Add corect Email</small>
+        <input type="password" v-model="user.password" id="passwordIn" placeholder="Password" />
         <small
-          v-else-if="($v.password.$dirty && !$v.password.minLength)"
+          v-if="($v.user.password.$dirty && !$v.user.password.required)"
+        >Password field is empty</small>
+        <small
+          v-else-if="($v.user.password.$dirty && !$v.user.password.minLength)"
         >Password must have more than 6 symbols</small>
         <span>
           <a href class="forgot">Forgot password?</a>
@@ -144,15 +146,22 @@
 </template>
 <script>
 import { email, required, minLength } from "vuelidate/lib/validators";
+import axios from "axios";
 export default {
   name: "signIn",
-  data: () => ({
-    email: "",
-    password: ""
-  }),
+  data() {
+    return {
+      user: {
+        email: "",
+        password: ""
+      }
+    };
+  },
   validations: {
-    email: { email, required },
-    password: { required, minLength: minLength(6) }
+    user: {
+      email: { email, required },
+      password: { required, minLength: minLength(6) }
+    }
   },
   methods: {
     signInHandler() {
@@ -163,9 +172,26 @@ export default {
     },
     submitSignIn() {
       if (!this.$v.$invalid) {
-        this.$router.push("/chat");
+        axios
+          .post("http://localhost:3000/accounts/sign-in", this.user)
+          .then(res => {
+            if (res.data.token) {
+              let token = res.data.token;
+              console.log(console);
+              localStorage.setItem("token", token);
+              this.$router.push("/chat");
+            }
+          });
       }
     }
+    // saveToken(res) {
+    //   if (res.data.token) {
+    //     const { token } = res.data;
+    //     localStorage.setItem("token", token);
+    //     console.log(this.axios);
+    //     axios.defaults.headers.common.Authorization = `JWT ${token}`;
+    //   }
+    // }
   }
 };
 </script>

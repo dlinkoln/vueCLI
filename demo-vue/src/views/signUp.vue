@@ -113,59 +113,61 @@
   <main class="wrapper">
     <div class="signUp">
       <h3 class="signUp__title">Sign up</h3>
-      <form action @submit.prevent="signUpHandler">
-        <div class="signUp__ns">
-          <input
-            type="text"
-            id="name"
-            placeholder="Name"
-            v-model.trim="firstName"
-            @change="signUpHandler"
-          />
-          <input
-            type="text"
-            id="surname"
-            placeholder="Surname"
-            v-model.trim="lastName"
-            @change="signUpHandler"
-          />
-        </div>
-        <small v-if="($v.firstName.$dirty && !$v.firstName.required)">Field Name is empty</small>
-        <small
-          v-else-if="($v.firstName.$dirty && !$v.firstName.minLength)"
-        >Field Name must have more than 3 symbols</small>
-
-        <small v-if="($v.firstName.$dirty && !$v.lastName.required)">Field Surname field is empty</small>
-        <small
-          v-else-if="($v.firstName.$dirty && !$v.lastName.minLength)"
-        >Field Surname must have more than 3 symbols</small>
+      <div class="signUp__ns">
         <input
           type="text"
-          id="username"
-          placeholder="Username"
-          v-model.trim="username"
+          id="name"
+          placeholder="Name"
+          v-model.trim="user.firstName"
           @change="signUpHandler"
         />
-        <small v-if="($v.firstName.$dirty && !$v.username.required)">Field Username field is empty</small>
-        <small
-          v-else-if="($v.firstName.$dirty && !$v.username.minLength)"
-        >Field Username must have more than 3 symbols</small>
         <input
-          type="email"
-          id="email"
-          placeholder="email"
-          v-model.trim="email"
+          type="text"
+          id="surname"
+          placeholder="Surname"
+          v-model.trim="user.lastName"
           @change="signUpHandler"
         />
-        <small v-if="($v.firstName.$dirty && !$v.email.required)">Field Email field is empty</small>
-        <small v-else-if="($v.firstName.$dirty && !$v.email.email)">Email is incorrect</small>
-        <button
-          type="submit"
-          class="sbm__btn sbm__btn_in"
-          id="started"
-          @click="submitSignUp"
-        >Get started</button>
-      </form>
+      </div>
+      <small v-if="($v.user.firstName.$dirty && !$v.user.firstName.required)">Field Name is empty</small>
+      <small
+        v-else-if="($v.user.firstName.$dirty && !$v.user.firstName.minLength)"
+      >Field Name must have more than 3 symbols</small>
+
+      <small
+        v-if="($v.user.firstName.$dirty && !$v.user.lastName.required)"
+      >Field Surname field is empty</small>
+      <small
+        v-else-if="($v.user.firstName.$dirty && !$v.user.lastName.minLength)"
+      >Field Surname must have more than 3 symbols</small>
+      <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        v-model.trim="user.username"
+        @change="signUpHandler"
+      />
+      <small
+        v-if="($v.user.firstName.$dirty && !$v.user.username.required)"
+      >Field Username field is empty</small>
+      <small
+        v-else-if="($v.user.firstName.$dirty && !$v.user.username.minLength)"
+      >Field Username must have more than 3 symbols</small>
+      <input
+        type="email"
+        id="email"
+        placeholder="email"
+        v-model.trim="user.email"
+        @change="signUpHandler"
+      />
+      <small v-if="($v.user.firstName.$dirty && !$v.user.email.required)">Field Email field is empty</small>
+      <small v-else-if="($v.user.firstName.$dirty && !$v.user.email.email)">Email is incorrect</small>
+      <button
+        type="submit"
+        class="sbm__btn sbm__btn_in"
+        id="started"
+        @click="submitSignUp"
+      >Get started</button>
     </div>
   </main>
 </body>
@@ -175,28 +177,37 @@
 import { email, required, minLength } from "vuelidate/lib/validators";
 export default {
   name: "complete",
-  data: () => ({
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: ""
-  }),
+  data() {
+    return {
+      user: {
+        lastName: "",
+        firstName: "",
+        username: "",
+        email: ""
+      }
+    };
+  },
+  props: {
+    signUp: Function
+  },
   validations: {
-    email: { email, required },
-    firstName: { required, minLength: minLength(3) },
-    lastName: { required, minLength: minLength(3) },
-    username: { required, minLength: minLength(3) }
+    user: {
+      email: { email, required },
+      firstName: { required, minLength: minLength(3) },
+      lastName: { required, minLength: minLength(3) },
+      username: { required, minLength: minLength(3) }
+    }
   },
   methods: {
     signUpHandler() {
       if (this.$v.$invalid) {
         this.$v.$touch();
-        return;
       }
     },
     submitSignUp() {
       if (!this.$v.$invalid) {
-        this.$router.push("/complete");
+        //this.signUp(this.user);
+        this.$router.push({ name: "complete", params: { user: this.user } });
       }
     }
   }
